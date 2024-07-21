@@ -14,7 +14,7 @@ class QueueListView(TitleMixin, ListView):
 class MembersListView(TitleMixin, ListView):
     template_name = "web/members.html"
     model = QueueMember
-    title =  "Members List"
+    title = "Members List"
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.filter(specific_queue_id=self.kwargs.get('queue_id'))

@@ -43,6 +43,9 @@ INSTALLED_APPS = [
 
     'web',
     'people_queue',
+    'api',
+
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
