@@ -4,7 +4,8 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.layers import get_channel_layer
 
-from api.serializers import SpecificQueueSerializer
+from api.serializers import SpecificQueueSerializer, MembersSerializer
+from people_queue.models import QueueMember
 
 
 class SpecificQueueConsumer(AsyncWebsocketConsumer):
@@ -28,4 +29,31 @@ class SpecificQueueConsumer(AsyncWebsocketConsumer):
         )
 
     async def queue_message(self, event):
+        await self.send(text_data=json.dumps({"new_objects_list": event["text"]}))
+
+
+class MembersConsumer(AsyncWebsocketConsumer):
+
+    async def connect(self):
+        self.queue_id = self.scope['url_route']['kwargs']['queue_id']
+
+        await self.channel_layer.group_add("members_list" + str(self.queue_id), self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, code):
+        await self.channel_layer.group_discard("members_list" + str(self.queue_id), self.channel_name)
+
+    @staticmethod
+    def redefine_members(specific_queue):
+        channel_layer = get_channel_layer()
+
+        async_to_sync(channel_layer.group_send)(
+            "members_list" + str(specific_queue),
+            {
+                "type": "members_message",
+                "text": MembersSerializer(QueueMember.objects.filter(specific_queue_id=specific_queue), many=True).data
+            },
+        )
+
+    async def members_message(self, event):
         await self.send(text_data=json.dumps({"new_objects_list": event["text"]}))

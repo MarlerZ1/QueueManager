@@ -2,7 +2,7 @@
 
 {% block content %}
     <h1 class="text-center mb-4">Members</h1>
-    <div style="overflow-y: scroll; height: 80vh">
+    <div style="overflow-y: scroll; height: 80vh" id="list">
         {% for member in object_list %}
             <div class="card mb-3">
                 <div class="card-body">
@@ -11,4 +11,28 @@
             </div>
         {% endfor %}
     </div>
+
+
+<script>
+let socket = new WebSocket('ws://localhost:8000/ws/members/' + {{ specific_queue }})
+
+socket.onmessage = function (event){
+    let djangoData = JSON.parse(event.data)
+    console.log(djangoData)
+    let div = document.querySelector("#list")
+    div.innerHTML = ""
+
+    for (const i in djangoData.new_objects_list) {
+        card = djangoData.new_objects_list.at(i)
+        div.innerHTML += `
+            <div class="card mb-3">
+                 <div class="card-body">
+                    <h5 class="card-title"> ${card.name} </h5>
+                </div>
+            </div>
+        `
+    }
+}
+
+</script>
 {% endblock %}
