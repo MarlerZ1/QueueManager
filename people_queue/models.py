@@ -31,7 +31,7 @@ def specific_queue_page_update_invoker(sender, instance, using, **kwargs):
 class QueueMember(models.Model):
     name = models.CharField(max_length=64, null=False, blank=False)
     specific_queue = models.ForeignKey(to=SpecificQueue, on_delete=models.CASCADE)
-
+    start_time = models.TimeField(null=True, blank=True)
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         from web.consumers import MembersConsumer
         super().save(force_insert=False, force_update=False, using=None, update_fields=None)
@@ -42,3 +42,9 @@ class QueueMember(models.Model):
 def specific_queue_page_update_invoker(sender, instance, using, **kwargs):
     from web.consumers import MembersConsumer
     MembersConsumer.redefine_members(instance.specific_queue.id)
+
+
+class AnswerTime(models.Model):
+    name = models.CharField(max_length=64, null=False, blank=False)
+    time = models.TimeField()
+    specific_queue = models.ForeignKey(to=SpecificQueue, on_delete=models.CASCADE)

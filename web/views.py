@@ -1,8 +1,11 @@
+from datetime import time, timedelta, datetime
+
 from django.shortcuts import render
+from django.utils.timezone import now
 from django.views.generic import ListView
 
 from common.view import TitleMixin
-from people_queue.models import QueueMember, SpecificQueue
+from people_queue.models import QueueMember, SpecificQueue, AnswerTime
 from web.forms import MembersCreationForm
 
 
@@ -43,7 +46,13 @@ class MembersListView(TitleMixin, ListView):
 def change_active_state(request, queue_id):
     queue = SpecificQueue.objects.get(id=queue_id)
     if request.user.is_superuser:
+        members = QueueMember.objects.filter(specific_queue_id=queue_id)
         queue.active = not queue.active
+        first = members[0]
+        if queue.active and members.exists():
+            first.start_time = now()
+            print("starttime: ", first.start_time)
+            first.save()
         queue.save()
 
     return render(request, "web/plug.html")
@@ -54,5 +63,20 @@ def remove_first_member(request, queue_id):
         members = QueueMember.objects.filter(specific_queue_id=queue_id)
 
         if members.exists():
+            now_t = now().time()
+
+            now_delta = timedelta(hours=now_t.hour, minutes=now_t.minute, seconds=now_t.second)
+            past_delta = timedelta(hours=members[0].start_time.hour, minutes=members[0].start_time.minute,seconds=members[0].start_time.second)
+            delta = now_delta - past_delta
+
+
+            AnswerTime.objects.create(specific_queue_id=queue_id, name=members[0].name,
+                                      time=(delta + datetime.min).time())
             members[0].delete()
+
+            if members[0]:
+                fist = members[0]
+                fist.start_time = now()
+                fist.save()
+                
     return render(request, 'web/plug.html')
