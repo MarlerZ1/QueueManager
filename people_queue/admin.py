@@ -12,7 +12,7 @@ class QueueMemberAdmin(admin.TabularInline):
 
 @admin.register(SpecificQueue)
 class SpecificQueueAdmin(admin.ModelAdmin):
-    fields = ('name', 'description',)
-    list_display = ('name',)
+    fields = ('name', 'description', 'active')
+    list_display = ('name', 'active')
     search_fields = ('name',)
     inlines = (QueueMemberAdmin,)

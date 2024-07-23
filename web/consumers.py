@@ -5,7 +5,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.layers import get_channel_layer
 
 from api.serializers import SpecificQueueSerializer, MembersSerializer
-from people_queue.models import QueueMember
+from people_queue.models import QueueMember, SpecificQueue
 
 
 class SpecificQueueConsumer(AsyncWebsocketConsumer):
@@ -51,9 +51,10 @@ class MembersConsumer(AsyncWebsocketConsumer):
             "members_list" + str(specific_queue),
             {
                 "type": "members_message",
-                "text": MembersSerializer(QueueMember.objects.filter(specific_queue_id=specific_queue), many=True).data
+                "text": MembersSerializer(QueueMember.objects.filter(specific_queue_id=specific_queue), many=True).data,
+                "new_active": SpecificQueue.objects.get(id=specific_queue).active
             },
         )
 
     async def members_message(self, event):
-        await self.send(text_data=json.dumps({"new_objects_list": event["text"]}))
+        await self.send(text_data=json.dumps({"new_objects_list": event["text"], "new_active": event["new_active"]}))

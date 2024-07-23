@@ -6,7 +6,7 @@ from people_queue.models import SpecificQueue, QueueMember
 class SpecificQueueSerializer(serializers.ModelSerializer):
     class Meta:
         model = SpecificQueue
-        fields = ('id', 'name', 'description',)
+        fields = ('id', 'name', 'description', 'active')
 
 
 class MembersSerializer(serializers.ModelSerializer):

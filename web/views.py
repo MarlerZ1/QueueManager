@@ -21,7 +21,7 @@ class MembersListView(TitleMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['specific_queue'] = self.kwargs.get('queue_id')
+        context['specific_queue'] = SpecificQueue.objects.get(id=self.kwargs.get('queue_id'))
         context['form'] = MembersCreationForm
         return context
 
@@ -35,7 +35,8 @@ class MembersListView(TitleMixin, ListView):
         if form.is_valid():
             member = form.save(commit=False)
             member.specific_queue = SpecificQueue.objects.get(id=self.kwargs.get("queue_id"))
-            member.save()
+            if member.specific_queue.active:
+                member.save()
         return render(request, "web/member_add.html", self.get_context_data())
 
 # def add_new_member(request, queue_id):

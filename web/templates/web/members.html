@@ -12,31 +12,45 @@
         {% endfor %}
     </div>
     <hr>
-    <div class="text-center">
-    <h4 class="mb-3">Add your member</h4>
-    {% include 'web/member_add.html' %}
+    <div class="text-center" id="add_member_block">
+        <h4 class="mb-3">Add your member</h4>
+        {% if specific_queue.active %}
+            {% include 'web/member_add.html' %}
+        {% else %}
+            <p>Wait when admin start queue</p>
+        {% endif %}
     </div>
 
-<script>
-let socket = new WebSocket('ws://localhost:8000/ws/members/' + {{ specific_queue }})
+    <script>
+        let socket = new WebSocket('ws://localhost:8000/ws/members/' + {{ specific_queue.id }})
 
-socket.onmessage = function (event){
-    let djangoData = JSON.parse(event.data)
-    console.log(djangoData)
-    let div = document.querySelector("#list")
-    div.innerHTML = ""
+        socket.onmessage = function (event) {
+            let djangoData = JSON.parse(event.data)
+            console.log(djangoData)
+            let div = document.querySelector("#list")
 
-    for (const i in djangoData.new_objects_list) {
-        card = djangoData.new_objects_list.at(i)
-        div.innerHTML += `
+            let add_member_block = document.querySelector("#add_member_block")
+            if (djangoData.new_active){
+                add_member_block.innerHTML = `<h4 class="mb-3">Add your member</h4>{% include "web/member_add.html" %}`
+            } else {
+                add_member_block.innerHTML = '<h4 class="mb-3">Add your member</h4><p>Wait when admin start queue</p>'
+            }
+
+
+
+            div.innerHTML = ""
+
+            for (const i in djangoData.new_objects_list) {
+                card = djangoData.new_objects_list.at(i)
+                div.innerHTML += `
             <div class="card mb-3">
                  <div class="card-body">
                     <h5 class="card-title"> ${card.name} </h5>
                 </div>
             </div>
         `
-    }
-}
+            }
+        }
 
-</script>
+    </script>
 {% endblock %}

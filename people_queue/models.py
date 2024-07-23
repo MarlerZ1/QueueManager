@@ -7,12 +7,16 @@ from django.dispatch import receiver
 class SpecificQueue(models.Model):
     name = models.CharField(max_length=128, null=False, blank=False)
     description = models.TextField(null=True, blank=True)
+    active = models.BooleanField(null=False, default=False)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         from web.consumers import SpecificQueueConsumer
+        from web.consumers import MembersConsumer
+
         super().save(force_insert=False, force_update=False, using=None, update_fields=None)
         objects = SpecificQueue.objects.all()
         SpecificQueueConsumer.redefine_queue(objects)
+        MembersConsumer.redefine_members(self.id)
 
 
 @receiver(post_delete, sender=SpecificQueue)
