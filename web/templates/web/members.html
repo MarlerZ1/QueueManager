@@ -1,8 +1,8 @@
 {% extends 'web/base.html' %}
 
 {% block content %}
-    <h1 class="text-center mb-4">Members</h1>
-    <div style="overflow-y: scroll; height: 80vh" id="list">
+    <h1 class="text-center">Members</h1>
+    <div style="overflow-y: scroll; height: 60vh" id="list">
         {% for member in object_list %}
             <div class="card mb-3">
                 <div class="card-body">
@@ -11,7 +11,11 @@
             </div>
         {% endfor %}
     </div>
-
+    <hr>
+    <div class="text-center">
+    <h4 class="mb-3">Add your member</h4>
+    {% include 'web/member_add.html' %}
+    </div>
 
 <script>
 let socket = new WebSocket('ws://localhost:8000/ws/members/' + {{ specific_queue }})

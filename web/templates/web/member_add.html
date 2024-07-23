@@ -1,0 +1,5 @@
+<form hx-post="{% url 'web:members' specific_queue %}" hx-swap="outerHTML" hx-target="this">
+    {% csrf_token %}
+    {{ form.name }}
+    <button type="submit" class="btn btn-success btn-lg mt-3">Добавить</button>
+</form>
