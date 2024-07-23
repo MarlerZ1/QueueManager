@@ -39,13 +39,15 @@ class MembersListView(TitleMixin, ListView):
                 member.save()
         return render(request, "web/member_add.html", self.get_context_data())
 
-# def add_new_member(request, queue_id):
-#     form = MembersCreationForm(request.POST)
-#     if form.is_valid():
-#         member = form.save(commit=False)
-#         member.specific_queue = SpecificQueue.objects.get(id=queue_id)
-#         member.save()
-#         context = dict()
-#         context['specific_queue'] = queue_id
-#         context['form'] = MembersCreationForm
-#     return render(request, "web/member_add.html", context)
+def change_active_state(request, queue_id):
+    queue = SpecificQueue.objects.get(id=queue_id)
+    if request.user.is_superuser:
+        queue.active = not queue.active
+        queue.save()
+
+    context = dict()
+    context['specific_queue'] = queue
+    context['form'] = MembersCreationForm
+
+
+    return render(request, "web/member_add.html", context)

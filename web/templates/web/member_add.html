@@ -1,5 +1,10 @@
-<form hx-post="{% url 'web:members' specific_queue.id %}" hx-swap="outerHTML" hx-target="this">
+<form hx-post="{% url 'web:members' specific_queue.id %}" hx-swap="outerHTML" id="member_add_form"
+      hx-target="this">
     {% csrf_token %}
     {{ form.name }}
-    <button type="submit" class="btn btn-success btn-lg mt-3">Добавить</button>
+    <div class="d-flex justify-content-center gap-3">
+        <a id="active_queue_disable" class="btn btn-warning btn-lg mt-3" hx-post="{% url 'web:change_active_state' specific_queue.id %}">Остановить</a>
+        <button type="submit" class="btn btn-success btn-lg mt-3">Добавить</button>
+        <a id="active_queue_pop" class="btn btn-danger btn-lg mt-3">Убрать</a>
+    </div>
 </form>

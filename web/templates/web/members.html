@@ -14,29 +14,79 @@
     <hr>
     <div class="text-center" id="add_member_block">
         <h4 class="mb-3">Add your member</h4>
-        {% if specific_queue.active %}
+        <div id="active_queue">
             {% include 'web/member_add.html' %}
-        {% else %}
+        </div>
+
+        <div id="inactive_queue_admin">
+            <form hx-post="{% url 'web:change_active_state' specific_queue.id %}" hx-swap="none">
+                    {% csrf_token %}
+                    <button class="btn btn-warning btn-lg mt-3">
+                        Запустить очередь
+                    </button>
+                </form>
+        </div>
+
+        <div id="inactive_queue">
             <p>Wait when admin start queue</p>
-        {% endif %}
+        </div>
+
+{#        {% if specific_queue.active %}#}
+{#            {% include 'web/member_add.html' %}#}
+{#        {% else %}#}
+{#            {% if user.is_authenticated and user.is_superuser%}#}
+{#                <form hx-post="{% url 'web:change_active_state' specific_queue.id %}" hx-swap="none">#}
+{#                    {% csrf_token %}#}
+{#                    <button class="btn btn-warning btn-lg mt-3">#}
+{#                        Запустить очередь#}
+{#                    </button>#}
+{#                </form>#}
+{#            {% else %}#}
+{#                <p>Wait when admin start queue</p>#}
+{#            {% endif %}#}
+{##}
+{#        {% endif %}#}
     </div>
 
     <script>
         let socket = new WebSocket('ws://localhost:8000/ws/members/' + {{ specific_queue.id }})
+
+
+        function reset_buttons(active) {
+            let inactive_queue = document.getElementById("inactive_queue")
+            let inactive_queue_admin = document.getElementById("inactive_queue_admin")
+            let active_queue = document.getElementById("active_queue")
+            let active_queue_disable = document.getElementById("active_queue_disable")
+            let active_queue_pop = document.getElementById("active_queue_pop")
+
+            active_queue.style.display = 'none'
+            inactive_queue_admin.style.display = 'none'
+            inactive_queue.style.display = 'none'
+            active_queue_disable.style.display = 'none'
+            active_queue_pop.style.display = 'none'
+
+
+            active_queue.style.display = active ? 'block' : 'none';
+
+            if ("{{ user.is_superuser }}" == "True")
+            {
+                inactive_queue_admin.style.display = active ? 'none' : 'block';
+                active_queue_disable.style.display = active ? 'block' : 'none';
+                active_queue_pop.style.display = active ? 'block' : 'none';
+            }
+            else
+                inactive_queue.style.display = active?'none':'block';
+
+
+        }
+        reset_buttons("{{ specific_queue.active }}" == "True")
 
         socket.onmessage = function (event) {
             let djangoData = JSON.parse(event.data)
             console.log(djangoData)
             let div = document.querySelector("#list")
 
-            let add_member_block = document.querySelector("#add_member_block")
-            if (djangoData.new_active){
-                add_member_block.innerHTML = `<h4 class="mb-3">Add your member</h4>{% include "web/member_add.html" %}`
-            } else {
-                add_member_block.innerHTML = '<h4 class="mb-3">Add your member</h4><p>Wait when admin start queue</p>'
-            }
-
-
+            reset_buttons(djangoData.new_active)
 
             div.innerHTML = ""
 
