@@ -3,8 +3,8 @@
     {% csrf_token %}
     {{ form.name }}
     <div class="d-flex justify-content-center gap-3">
-        <a id="active_queue_disable" class="btn btn-warning btn-lg mt-3" hx-post="{% url 'web:change_active_state' specific_queue.id %}">Остановить</a>
+        <a id="active_queue_disable" class="btn btn-warning btn-lg mt-3" hx-swap="none" hx-post="{% url 'web:change_active_state' specific_queue.id %}">Остановить</a>
         <button type="submit" class="btn btn-success btn-lg mt-3">Добавить</button>
-        <a id="active_queue_pop" class="btn btn-danger btn-lg mt-3">Убрать</a>
+        <a id="active_queue_pop" class="btn btn-danger btn-lg mt-3" hx-swap="none" hx-post="{% url 'web:remove_first_member' specific_queue.id %}">Убрать</a>
     </div>
 </form>

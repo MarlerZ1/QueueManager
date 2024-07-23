@@ -39,15 +39,20 @@ class MembersListView(TitleMixin, ListView):
                 member.save()
         return render(request, "web/member_add.html", self.get_context_data())
 
+
 def change_active_state(request, queue_id):
     queue = SpecificQueue.objects.get(id=queue_id)
     if request.user.is_superuser:
         queue.active = not queue.active
         queue.save()
 
-    context = dict()
-    context['specific_queue'] = queue
-    context['form'] = MembersCreationForm
+    return render(request, "web/plug.html")
 
 
-    return render(request, "web/member_add.html", context)
+def remove_first_member(request, queue_id):
+    if request.user.is_superuser:
+        members = QueueMember.objects.filter(specific_queue_id=queue_id)
+
+        if members.exists():
+            members[0].delete()
+    return render(request, 'web/plug.html')
