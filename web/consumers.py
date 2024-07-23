@@ -44,7 +44,7 @@ class MembersConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard("members_list" + str(self.queue_id), self.channel_name)
 
     @staticmethod
-    def redefine_members(specific_queue):
+    def redefine_members(specific_queue, is_active_status_changed=False):
         channel_layer = get_channel_layer()
 
         async_to_sync(channel_layer.group_send)(
@@ -52,9 +52,11 @@ class MembersConsumer(AsyncWebsocketConsumer):
             {
                 "type": "members_message",
                 "text": MembersSerializer(QueueMember.objects.filter(specific_queue_id=specific_queue), many=True).data,
-                "new_active": SpecificQueue.objects.get(id=specific_queue).active
+                "new_active": SpecificQueue.objects.get(id=specific_queue).active,
+                "is_active_status_changed": is_active_status_changed
             },
         )
 
     async def members_message(self, event):
-        await self.send(text_data=json.dumps({"new_objects_list": event["text"], "new_active": event["new_active"]}))
+        await self.send(text_data=json.dumps({"new_objects_list": event["text"], "new_active": event["new_active"],
+                                              "is_active_status_changed": event["is_active_status_changed"]}))

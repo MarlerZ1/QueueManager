@@ -12,11 +12,13 @@ class SpecificQueue(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         from web.consumers import SpecificQueueConsumer
         from web.consumers import MembersConsumer
-
+        is_active_updated = self.active != SpecificQueue.objects.get(id=self.id).active
         super().save(force_insert=False, force_update=False, using=None, update_fields=None)
+
         objects = SpecificQueue.objects.all()
         SpecificQueueConsumer.redefine_queue(objects)
-        MembersConsumer.redefine_members(self.id)
+        if is_active_updated:
+            MembersConsumer.redefine_members(self.id, is_active_updated)
 
 
 @receiver(post_delete, sender=SpecificQueue)
