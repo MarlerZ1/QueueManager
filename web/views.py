@@ -48,10 +48,10 @@ def change_active_state(request, queue_id):
     if request.user.is_superuser:
         members = QueueMember.objects.filter(specific_queue_id=queue_id)
         queue.active = not queue.active
-        first = members[0]
+
         if queue.active and members.exists():
+            first = members[0]
             first.start_time = now()
-            print("starttime: ", first.start_time)
             first.save()
         queue.save()
 
@@ -78,5 +78,5 @@ def remove_first_member(request, queue_id):
                 fist = members[0]
                 fist.start_time = now()
                 fist.save()
-                
+
     return render(request, 'web/plug.html')
