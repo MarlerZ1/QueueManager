@@ -2,7 +2,7 @@ from datetime import time, timedelta, datetime
 
 from django.shortcuts import render
 from django.utils.timezone import now
-from django.views.generic import ListView
+from django.views.generic import ListView, TemplateView
 
 from common.view import TitleMixin
 from people_queue.models import QueueMember, SpecificQueue, AnswerTime
@@ -74,9 +74,14 @@ def remove_first_member(request, queue_id):
                                       time=(delta + datetime.min).time())
             members[0].delete()
 
-            if members[0]:
+            if members.exists():
                 fist = members[0]
                 fist.start_time = now()
                 fist.save()
 
     return render(request, 'web/plug.html')
+
+
+class StatisticTemplateView(TitleMixin, TemplateView):
+    template_name = 'web/statistics_graph.html'
+    title = 'Queue - Statistic'

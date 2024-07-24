@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+from django.utils.timezone import now
 
 
 # Create your models here.
@@ -34,6 +35,7 @@ class QueueMember(models.Model):
     start_time = models.TimeField(null=True, blank=True)
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         from web.consumers import MembersConsumer
+        self.start_time = now()
         super().save(force_insert=False, force_update=False, using=None, update_fields=None)
         MembersConsumer.redefine_members(self.specific_queue.id)
 
