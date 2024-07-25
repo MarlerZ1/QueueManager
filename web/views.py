@@ -40,7 +40,7 @@ class MembersListView(TitleMixin, ListView):
             member.specific_queue = SpecificQueue.objects.get(id=self.kwargs.get("queue_id"))
             if member.specific_queue.active:
                 member.save()
-        return render(request, "web/member_add.html", self.get_context_data())
+        return render(request, "web/member_add_form_field.html", self.get_context_data())
 
 
 def change_active_state(request, queue_id):

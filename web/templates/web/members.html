@@ -15,7 +15,20 @@
     <div class="text-center" id="add_member_block">
         <h4 class="mb-3">Add your member</h4>
         <div id="active_queue">
-            {% include 'web/member_add.html' %}
+            <form hx-post="{% url 'web:members' specific_queue.id %}" hx-swap="outerHTML" id="member_add_form"
+                  hx-target="#{{ form.name.id_for_label }}">
+                {% csrf_token %}
+                {% include 'web/member_add_form_field.html' %}
+                <div class="d-flex justify-content-center gap-3">
+                    <a id="active_queue_disable" class="btn btn-warning btn-lg mt-3" hx-swap="none"
+                       hx-post="{% url 'web:change_active_state' specific_queue.id %}">Остановить</a>
+                    <button type="submit" class="btn btn-success btn-lg mt-3">Добавить</button>
+                    <a id="active_queue_pop" class="btn btn-danger btn-lg mt-3" hx-swap="none"
+                       hx-post="{% url 'web:remove_first_member' specific_queue.id %}">Убрать</a>
+                </div>
+            </form>
+
+
         </div>
 
         <div id="inactive_queue_admin">
@@ -54,18 +67,17 @@
 
             active_queue.style.display = active ? 'block' : 'none';
 
-            if ("{{ user.is_superuser }}" == "True") {
+            if ("{{ user.is_superuser }}" === "True") {
                 inactive_queue_admin.style.display = active ? 'none' : 'block';
+
                 active_queue_disable.style.display = active ? 'block' : 'none';
                 active_queue_pop.style.display = active ? 'block' : 'none';
             } else
                 inactive_queue.style.display = active ? 'none' : 'block';
-
-
         }
 
 
-        reset_buttons("{{ specific_queue.active }}" == "True")
+        reset_buttons("{{ specific_queue.active }}" === "True")
 
         socket.onmessage = function (event) {
             let djangoData = JSON.parse(event.data)
