@@ -13,10 +13,16 @@ class SpecificQueue(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         from web.consumers import SpecificQueueConsumer
         from web.consumers import MembersConsumer
-        is_active_updated = self.active != SpecificQueue.objects.get(id=self.id).active
-        super().save(force_insert=False, force_update=False, using=None, update_fields=None)
-
         objects = SpecificQueue.objects.all()
+        alredy_exist_versions = objects.filter(id=self.id)
+
+        if (alredy_exist_versions.exists()):
+            is_active_updated = self.active != alredy_exist_versions.first().active
+        else:
+            is_active_updated = False
+
+        super().save(force_insert, force_update, using, update_fields)
+
         SpecificQueueConsumer.redefine_queue(objects)
         if is_active_updated:
             MembersConsumer.redefine_members(self.id, is_active_updated)
