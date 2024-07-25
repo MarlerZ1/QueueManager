@@ -1,3 +1,9 @@
-from django.shortcuts import render
+from rest_framework.viewsets import ModelViewSet
 
-# Create your views here.
+from api.serializers import SpecificQueueSerializer
+from people_queue.models import SpecificQueue
+
+
+class SpecificQueueModelViewSet(ModelViewSet):
+    queryset = SpecificQueue.objects.all()
+    serializer_class = SpecificQueueSerializer
