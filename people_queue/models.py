@@ -33,6 +33,7 @@ class QueueMember(models.Model):
     name = models.CharField(max_length=64, null=False, blank=False)
     specific_queue = models.ForeignKey(to=SpecificQueue, on_delete=models.CASCADE)
     start_time = models.TimeField(null=True, blank=True)
+
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         from web.consumers import MembersConsumer
         self.start_time = now()
@@ -50,3 +51,12 @@ class AnswerTime(models.Model):
     name = models.CharField(max_length=64, null=False, blank=False)
     time = models.TimeField()
     specific_queue = models.ForeignKey(to=SpecificQueue, on_delete=models.CASCADE)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        from web.consumers import StatisticConsumer
+        super().save(force_insert, force_update, using, update_fields)
+
+        StatisticConsumer.redefine_statistic(self)
+        objects = AnswerTime.objects.filter(specific_queue=self.specific_queue)
+        if objects.count() > 5:
+            objects.first().delete()

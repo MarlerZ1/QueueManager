@@ -1,8 +1,13 @@
 {% extends 'web/base.html' %}
 
 {% block content %}
-    <h1>Statistic Graph</h1>
+    <h1 class="text-center">Statistic Graph</h1>
+    <div class="d-flex gap-3">
+    <h4> Last answer:</h4>
+    <p style="font-size: 1.4em" id="name">People</p>
+    <p style="font-size: 1.4em" id="time">0</p>
 
+    </div>
     <canvas id="chart" width="400" height="200"></canvas>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -14,36 +19,44 @@
 
         let graphData = {
             type: 'line', data: {
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{
-                    label: 'Simple Dynamic Graph',
-                    data: [0, 0, 0, 0, 0, 0, 0],
+                labels: ['Peop', 'Peop', 'Peop', 'Peop', 'Peop'], datasets: [{
+                    label: 'Answers time in minuts',
+                    data: [0, 0, 0, 0, 0],
                     fill: false,
                     borderColor: 'rgb(75,192,192)',
                     tension: 0.1
-                }]
+                }],
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                        }
+                    }
+                }
             }
         }
 
         let chart = new Chart(ctx, graphData)
 
 
-        {#let socket = new WebSocket('ws://localhost:8000/ws/graph/')#}
-        {##}
-        {#socket.onmessage = function (event) {#}
-        {#    let djangoData = JSON.parse(event.data)#}
-        {#    document.querySelector('#app').innerText = djangoData.value#}
-        {##}
-        {#    let newGraphData = graphData.data.datasets[0].data#}
-        {#    newGraphData.shift()#}
-        {#    newGraphData.push(djangoData.value)#}
-        {#    graphData.data.datasets[0].data = newGraphData#}
-        {##}
-        {#    let newGraphLabels = graphData.data.labels#}
-        {#    newGraphLabels.shift()#}
-        {#    newGraphLabels.push(djangoData.day)#}
-        {#    graphData.data.labels = newGraphLabels#}
-        {#    chart.update()#}
-        {#}#}
+        let socket = new WebSocket('ws://localhost:8000/ws/statistic/' + {{ queue_id }})
+
+        socket.onmessage = function (event) {
+            let djangoData = JSON.parse(event.data)
+            document.querySelector('#name').innerText = djangoData.object.name
+            document.querySelector('#time').innerText = Math.round(djangoData.object.time * 100) / 100
+
+            let newGraphData = graphData.data.datasets[0].data
+            newGraphData.shift()
+            newGraphData.push(djangoData.object.time)
+            graphData.data.datasets[0].data = newGraphData
+
+            let newGraphLabels = graphData.data.labels
+            newGraphLabels.shift()
+            newGraphLabels.push(djangoData.object.name)
+            graphData.data.labels = newGraphLabels
+            chart.update()
+        }
     </script>
 {% endblock %}
 
