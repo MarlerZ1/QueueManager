@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 
 from django.shortcuts import render
 from django.utils.timezone import now
-from django.views.generic import ListView, TemplateView
+from django.views.generic import TemplateView
 
 from common.view import TitleMixin
 from people_queue.models import QueueMember, SpecificQueue, AnswerTime
@@ -10,14 +10,12 @@ from web.forms import MembersCreationForm
 
 
 # Create your views here.
-class QueueListView(TitleMixin, ListView):
+class QueueTemplateView(TitleMixin, TemplateView):
     template_name = "web/index.html"
-    model = SpecificQueue
-    queryset = SpecificQueue.objects.all()
     title = "Queue List"
 
 
-class MembersListView(TitleMixin, ListView):
+class MembersTemplateView(TitleMixin, TemplateView):
     template_name = "web/members.html"
     model = QueueMember
     title = "Members List"
@@ -28,12 +26,7 @@ class MembersListView(TitleMixin, ListView):
         context['form'] = MembersCreationForm
         return context
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        return queryset.filter(specific_queue_id=self.kwargs.get('queue_id'))
-
     def post(self, request, *args, **kwargs):
-        self.object_list = self.get_queryset()
         form = MembersCreationForm(request.POST)
         if form.is_valid():
             member = form.save(commit=False)

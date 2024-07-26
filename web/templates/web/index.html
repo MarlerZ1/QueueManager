@@ -1,39 +1,37 @@
 {% extends 'web/base.html' %}
 {% block content %}
     <h1 class="text-center">Queues</h1>
-    <div style="overflow-y: auto; height: 75vh" id="list">
-        {% for queue in object_list %}
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">{{ queue.name }}</h5>
-                    <p class="card-text">{{ queue.description }}</p>
-                    <a href="{% url 'web:members' queue.id %}" class="card-link">Просмотреть</a>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
+
+    <div style="overflow-y: auto; height: 75vh" id="list"></div>
+
     <script>
-let socket = new WebSocket('ws://localhost:8000/ws/queue/')
 
-socket.onmessage = function (event){
-    let djangoData = JSON.parse(event.data)
+        let socket = new WebSocket('ws://localhost:8000/ws/queue/')
 
-    let div = document.querySelector("#list")
-    div.innerHTML = ""
+        socket.onopen = () => socket.send("")
 
-    for (const i in djangoData.new_objects_list) {
-        card = djangoData.new_objects_list.at(i)
-        div.innerHTML += `
+        let members_page_url_basic = "{% url 'web:members' 1 %}".slice(0, -1)
+
+        socket.onmessage = function (event) {
+
+            let djangoData = JSON.parse(event.data)
+
+            let div = document.querySelector("#list")
+            div.innerHTML = ""
+
+            for (const i in djangoData.new_objects_list) {
+                card = djangoData.new_objects_list.at(i)
+                div.innerHTML += `
             <div class="card mb-3">
                  <div class="card-body">
                     <h5 class="card-title"> ${card.name} </h5>
                     <p class="card-text">${card.description}</p>
-                    <a href="/" class="card-link">Просмотреть</a>
+                    <a href="${members_page_url_basic}${card.id}" class="card-link">Просмотреть</a>
                 </div>
             </div>
         `
-    }
-}
+            }
+        }
 
-</script>
+    </script>
 {% endblock %}

@@ -14,10 +14,10 @@ class SpecificQueue(models.Model):
         from web.consumers import SpecificQueueConsumer
         from web.consumers import MembersConsumer
         objects = SpecificQueue.objects.all()
-        alredy_exist_versions = objects.filter(id=self.id)
+        already_exist_versions = objects.filter(id=self.id)
 
-        if (alredy_exist_versions.exists()):
-            is_active_updated = self.active != alredy_exist_versions.first().active
+        if (already_exist_versions.exists()):
+            is_active_updated = self.active != already_exist_versions.first().active
         else:
             is_active_updated = False
 

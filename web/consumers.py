@@ -31,6 +31,9 @@ class SpecificQueueConsumer(AsyncWebsocketConsumer):
     async def queue_message(self, event):
         await self.send(text_data=json.dumps({"new_objects_list": event["text"]}))
 
+    async def receive(self, text_data=None, bytes_data=None):
+        await sync_to_async(SpecificQueueConsumer.redefine_queue)(SpecificQueue.objects.all())
+
 
 class MembersConsumer(AsyncWebsocketConsumer):
 
@@ -61,6 +64,10 @@ class MembersConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({"new_objects_list": event["text"], "new_active": event["new_active"],
                                               "is_active_status_changed": event["is_active_status_changed"]}))
 
+    async def receive(self, text_data=None, bytes_data=None):
+        text_data_json = json.loads(text_data)
+        await sync_to_async(MembersConsumer.redefine_members)(text_data_json["specific_queue"], True)
+
 
 class StatisticConsumer(AsyncWebsocketConsumer):
 
@@ -88,7 +95,6 @@ class StatisticConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, code):
         await self.channel_layer.group_discard("statistic_" + str(self.queue_id), self.channel_name)
 
-
     @staticmethod
     def redefine_statistic(answer_object):
         channel_layer = get_channel_layer()
@@ -109,4 +115,4 @@ class StatisticConsumer(AsyncWebsocketConsumer):
         minuts += seconds / 60 + hourst * 60
         object['time'] = minuts
 
-        await self.send(text_data=json.dumps({"object": object }))
+        await self.send(text_data=json.dumps({"object": object}))
