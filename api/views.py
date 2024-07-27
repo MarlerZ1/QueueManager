@@ -18,8 +18,11 @@ class MembersModelViewSet(ModelViewSet):
     def get_queryset(self):
         req = self.request
         specific_queue_filter = req.query_params.get('specific_queue')
+        name = req.query_params.get('name')
         if specific_queue_filter:
             self.queryset = self.queryset.filter(specific_queue=specific_queue_filter)
-            return self.queryset
-        else:
-            return self.queryset
+
+        if name:
+            self.queryset = self.queryset.filter(name=name)
+
+        return self.queryset
