@@ -1,0 +1,28 @@
+services:
+  db:
+    image: mysql
+    env_file: ".env"
+    volumes:
+      - "mysql_db:/var/lib/mysql"
+    ports:
+      - "3307:3306"
+
+  redis:
+    image: redis
+    container_name: "redis"
+    ports:
+      - "6380:6379"
+
+  django:
+    container_name: "django"
+    build: ./
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/usr/src/app
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  mysql_db:

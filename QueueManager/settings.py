@@ -86,11 +86,11 @@ ASGI_APPLICATION = 'QueueManager.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE'),
-        'NAME': os.getenv('DB_NAME'),
+        'NAME': os.getenv('MYSQL_DATABASE'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT'),
         'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'PASSWORD': os.getenv('MYSQL_ROOT_PASSWORD'),
     }
 }
 
@@ -143,7 +143,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+            'hosts': [('redis', 6379)],
         }
     }
 }
