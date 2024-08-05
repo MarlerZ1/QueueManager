@@ -2,10 +2,17 @@ services:
   db:
     image: mysql
     env_file: ".env"
+    container_name: db
     volumes:
       - "mysql_db:/var/lib/mysql"
     ports:
       - "3307:3306"
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 55
 
   redis:
     image: redis
@@ -13,16 +20,26 @@ services:
     ports:
       - "6380:6379"
 
-  django:
-    container_name: "django"
+  migrations:
     build: ./
+    container_name: "migrations"
+    command: python manage.py migrate
+    depends_on:
+      db:
+        condition: service_healthy
+
+  django:
+    build: ./
+    container_name: "django"
     ports:
       - "8000:8000"
     volumes:
       - ./:/usr/src/app
     depends_on:
-      - db
-      - redis
+      redis:
+        condition: service_started
+      migrations:
+        condition: service_completed_successfully
 
 volumes:
   mysql_db:
